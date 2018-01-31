@@ -1,3 +1,5 @@
+#--Game Options & Settings---#
+
 WIDTH = 1000
 HEIGHT = 500
 
@@ -8,3 +10,5 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 FPS = 120
+
+TITLE = "Snek-chad vs the world"

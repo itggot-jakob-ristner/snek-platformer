@@ -6,7 +6,7 @@ class Player(pg.sprite.Sprite):
     def __init__(self, game):
         pg.sprite.Sprite.__init__(self)
         self.game = game
-        self.image = pg.Surface((40, 40))
+        self.image = pg.Surface((41, 41))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
@@ -20,6 +20,7 @@ class Player(pg.sprite.Sprite):
         # jump only if standing on a platform
         if not self.jumping:
             self.vel.y = -20
+            self.jumping = True
 
     def update(self):
         self.prev_pos = self.pos
@@ -42,23 +43,46 @@ class Player(pg.sprite.Sprite):
         if self.pos.x < 0:
             self.pos.x = WIDTH
 
-        self.rect.midbottom = self.pos
+        self.rect.x = self.pos.x
+        self.collide("x") 
+
+        self.rect.y = self.pos.y
         self.collide("y")
-    
+
+
+
+
+        
+         
+
     def collide(self, direction):
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         if hits:
             if direction == "y":
                 if self.vel.y > 0:
+                    print("HIT TOP SIDE OF WALL")
                     self.rect.bottom = hits[0].rect.top
                     self.vel.y = 0
                     self.jumping = False
-                    self.pos = vec(self.rect.centerx, self.rect.bottom)
+                    self.pos = vec(self.rect.x, self.rect.y)
                 elif self.vel.y < 0:
+                    print("HIT BOTTOM SIDE OF WALL")
                     self.rect.top = hits[0].rect.bottom
                     self.vel.y = 0
-                    self.jumping = True
-                    self.pos = vec(self.rect.centerx, self.rect.bottom)
+                    self.pos = vec(self.rect.x, self.rect.y)
+            
+            elif direction == "x":
+                if self.vel.x > 0:
+                    print("HIT LEFT SIDE OF WALL")
+                    self.rect.right = hits[0].rect.left
+                    self.vel.x = 0
+                    self.pos = vec(self.rect.x, self.rect.y)
+                if self.vel.x < 0:
+                    print ("HIT RIGHT SIDE OF WALL")
+                    self.rect.left = hits[0].rect.right
+                    self.vel.x = 0
+                    self.pos = vec(self.rect.x, self.rect.y)
+
 
 
 

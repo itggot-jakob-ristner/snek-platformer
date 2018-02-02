@@ -11,8 +11,8 @@ PLAYER_GRAV = 0.8
 
 # Starting platforms
 PLATFORM_LIST = [(0, HEIGHT - 40, WIDTH, 40),
-                 (WIDTH / 2 - 50, HEIGHT * 3 / 4, 100, 20),
-                 (125, HEIGHT - 350, 100, 20),
+                 (WIDTH / 2 - 50, HEIGHT * 3 / 4, 100, 200),
+                 (125, HEIGHT - 350, 100, 200),
                  (350, 200, 100, 20),
                  (175, 100, 50, 20)]
 

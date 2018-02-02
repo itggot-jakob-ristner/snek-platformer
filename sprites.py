@@ -26,6 +26,7 @@ class Player(pg.sprite.Sprite):
         self.prev_pos = self.pos
 
         self.acc = vec(0, PLAYER_GRAV)
+
         keys = pg.key.get_pressed()
         if keys[pg.K_a]:
             self.acc.x = -PLAYER_ACC
@@ -33,7 +34,11 @@ class Player(pg.sprite.Sprite):
             self.acc.x = PLAYER_ACC
 
         # apply friction
+      
         self.acc.x += self.vel.x * PLAYER_FRICTION
+       
+
+
 
 
         # makes friction work both directions :P
@@ -97,3 +102,42 @@ class Platform(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       

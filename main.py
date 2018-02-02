@@ -19,7 +19,8 @@ class Game:
         self.platforms = pg.sprite.Group()
         self.player = Player(self)
         self.all_sprites.add(self.player)
-        for plat in PLATFORM_LIST:
+        self.create_map()
+        for plat in PLATFORM_LIST2:
             p = Platform(*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
@@ -65,6 +66,15 @@ class Game:
     def show_go_screen(self):
         # game over/continue
         pass
+
+    def create_map(self):
+        self.map = MAP[::-1]
+        index_y = HEIGHT - 40
+        for y, line in enumerate(self.map):
+           for x, letter in enumerate(line):
+               if letter == "*":
+                   PLATFORM_LIST2.append((x * 50, index_y  - y * 40, 50, 40))
+                
 
 g = Game()
 g.show_start_screen()

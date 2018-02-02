@@ -2,12 +2,12 @@
 TITLE = "Snek-chad vs the world"
 WIDTH = 1024
 HEIGHT = 768
-FPS = 60
+FPS = 120
 
 # Player properties
 PLAYER_ACC = 0.6
 PLAYER_FRICTION = -0.08
-PLAYER_GRAV = 0.8
+PLAYER_GRAV = 0.4
 
 # Starting platforms
 PLATFORM_LIST = [(0, HEIGHT - 40, WIDTH, 40),

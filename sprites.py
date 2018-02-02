@@ -6,7 +6,7 @@ class Player(pg.sprite.Sprite):
     def __init__(self, game):
         pg.sprite.Sprite.__init__(self)
         self.game = game
-        self.image = pg.Surface((41, 41))
+        self.image = pg.Surface((40, 40))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
@@ -55,13 +55,18 @@ class Player(pg.sprite.Sprite):
 
         self.rect.y = self.pos.y
         self.collide("y")
+    
+        self.rect.y += 1
+        hits = pg.sprite.spritecollide(self, self.game.platforms, False)
+        if not hits:
+            self.jumping = True
+        self.rect.y -= 1
 
     def collide(self, direction):
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         if hits:
             if direction == "y":
                 if self.vel.y > 0:
-
                     self.rect.bottom = hits[0].rect.top
                     self.vel.y = 0
                     self.jumping = False
@@ -70,6 +75,7 @@ class Player(pg.sprite.Sprite):
                     self.rect.top = hits[0].rect.bottom
                     self.vel.y = 0
                     self.pos = vec(self.rect.x, self.rect.y)
+
             
             elif direction == "x":
                 if self.vel.x > 0:
@@ -81,6 +87,7 @@ class Player(pg.sprite.Sprite):
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
                 self.jumping = False
+        
 
 class Platform(pg.sprite.Sprite):
     def __init__(self, x, y, w, h):

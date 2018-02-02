@@ -29,7 +29,7 @@ class Game:
         # Game Loop
         self.playing = True
         while self.playing:
-            self.clock.tick(FPS)
+            self.dt = self.clock.tick(FPS)
             self.events()
             self.update()
             self.draw()

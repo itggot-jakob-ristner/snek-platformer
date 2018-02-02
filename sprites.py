@@ -40,8 +40,8 @@ class Player(pg.sprite.Sprite):
         self.vel += self.acc
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
-        self.pos.x += d_x
-        self.pos.y += d_y
+        self.pos.x += d_x * (self.game.dt / 20)
+        self.pos.y += d_y * (self.game.dt / 20)
 
 
         # wrap around the sides of the screen

@@ -12,7 +12,7 @@ HEIGHT = 500
 
 PLAYER_ACC = 0.5
 PLAYER_FRIC = 0.05
-PLAYER_GRAV = 0.5
+PLAYER_GRAV = 0.2
 
 SPEED = 5
 
@@ -87,7 +87,6 @@ class Player(pg.sprite.Sprite):
 
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
-        print(self.vel.x, self.acc.x)
         self.pos.x += d_x
         self.pos.y += d_y
         #self.center = self.pos
@@ -96,13 +95,16 @@ class Player(pg.sprite.Sprite):
         self.collide_with_walls()
 
     def collide_with_walls(self):
+       
         for platform in platforms:
             if self.rect.colliderect(platform.rect):
+               
                 if self.vel.y > 0:
                     self.vel.y = 0
                     self.is_jumping = False
                     self.rect.bottom = platform.rect.top
                     self.pos = vec(self.rect.centerx, self.rect.centery)
+      
 
 Platform(0, 450, 700, 50)
 Platform(300, 300, 30, 20)

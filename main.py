@@ -38,7 +38,6 @@ class Game:
         # Game Loop - Update
         self.all_sprites.update()
         # check if player hits a platform - only if falling
-        #self.player.collide()
 
     def events(self):
         # Game Loop - events

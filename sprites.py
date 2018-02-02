@@ -34,9 +34,16 @@ class Player(pg.sprite.Sprite):
 
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
-        # equations of motion
+
+
+        # makes friction work both directions :P
         self.vel += self.acc
-        self.pos += self.vel + 0.5 * self.acc
+        d_x = int(self.vel.x + 0.5 * self.acc.x)
+        d_y = int(self.vel.y + 0.5 * self.acc.y)
+        self.pos.x += d_x
+        self.pos.y += d_y
+
+
         # wrap around the sides of the screen
         if self.pos.x > WIDTH:
             self.pos.x = 0
@@ -49,55 +56,31 @@ class Player(pg.sprite.Sprite):
         self.rect.y = self.pos.y
         self.collide("y")
 
-
-
-
-        
-         
-
     def collide(self, direction):
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         if hits:
             if direction == "y":
                 if self.vel.y > 0:
-                    print("HIT TOP SIDE OF WALL")
+
                     self.rect.bottom = hits[0].rect.top
                     self.vel.y = 0
                     self.jumping = False
                     self.pos = vec(self.rect.x, self.rect.y)
                 elif self.vel.y < 0:
-                    print("HIT BOTTOM SIDE OF WALL")
                     self.rect.top = hits[0].rect.bottom
                     self.vel.y = 0
                     self.pos = vec(self.rect.x, self.rect.y)
             
             elif direction == "x":
                 if self.vel.x > 0:
-                    print("HIT LEFT SIDE OF WALL")
                     self.rect.right = hits[0].rect.left
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
                 if self.vel.x < 0:
-                    print ("HIT RIGHT SIDE OF WALL")
-                    self.rect.left = hits[0].rect.right
+                    self.rect.left = hits[0].rect.right 
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
-
-
-
-
-    
-    def collide2(self):
-        for platform in self.game.platforms:
-            if self.rect.colliderect(platform.rect):
-               
-                if self.vel.y > 0:
-                    self.vel.y = 0
-                    self.is_jumping = False
-                    self.rect.bottom = platform.rect.top
-                    self.pos = vec(self.rect.centerx, self.rect.centery)
-                
-            
+                self.jumping = False
 
 class Platform(pg.sprite.Sprite):
     def __init__(self, x, y, w, h):

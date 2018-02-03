@@ -17,13 +17,13 @@ class Game:
         # start a new game
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
+        self.map = Map(MAP, self)
         self.player = Player(self)
         self.all_sprites.add(self.player)
-        self.create_map()
-        
-        self.load_platforms(PLATFORM_LIST2)
-        self.load_platforms(PLATFORM_LIST)
 
+        #self.load_platforms(PLATFORM_LIST2)
+        #self.load_platforms(PLATFORM_LIST)
+        self.map.loadmap()
         self.run()
 
     def run(self):
@@ -66,21 +66,6 @@ class Game:
     def show_go_screen(self):
         # game over/continue
         pass
-
-    def create_map(self):
-        self.map = MAP[::-1]
-        index_y = HEIGHT - 40
-        for y, line in enumerate(self.map):
-           for x, letter in enumerate(line):
-               if letter == "*":
-                   PLATFORM_LIST2.append((x * 50, index_y  - y * 40, 50, 40))
-    
-
-    def load_platforms(self, array):
-        for plat in array:
-            p = Platform(*plat)
-            self.all_sprites.add(p)
-            self.platforms.add(p)
 
 g = Game()
 g.show_start_screen()

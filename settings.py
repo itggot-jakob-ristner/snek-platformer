@@ -1,13 +1,13 @@
  
 TITLE = "Snek-chad vs the world"
-WIDTH = 1450
+WIDTH = 1024
 HEIGHT = 768
 FPS = 120
 
 # Player properties
-PLAYER_ACC = 0.6
-PLAYER_FRICTION = -0.05
-PLAYER_GRAV = 0.3
+PLAYER_ACC = 0.3
+PLAYER_FRICTION = -0.04
+PLAYER_GRAV = 0.6
 AIR_RESISTANCE = -0.02
 
 # Starting platforms
@@ -27,15 +27,20 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 LIGHTBLUE = (0, 155, 155)
 
+#Tile settings
+TILESIZE= 32
+
+
 
 
 #---Map drawing---#
 MAP = [
-    "          ********           ",
-    "                             ",
-    "                             ",
-    "                             ",
-    "**                         **",
-    "***      **********       ***",
-    "*****************************"
+    ["W          WWWWWWWW                 ",
+    "W                                   ",
+    "W                                   ",
+    "W                                   ",
+    "WW                           WWWWWWW",
+    "WWW      WWWWWWWWWWWWW       WWWWWWW",
+    "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
+    ], (WIDTH / 2, HEIGHT / 2)
 ]

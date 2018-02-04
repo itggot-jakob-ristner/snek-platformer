@@ -1,8 +1,11 @@
 import pygame as pg
 import random
+import pytmx
 from settings import *
 from sprites import *
 from tilemap import *
+from os import path
+
 
 class Game:
     def __init__(self):
@@ -14,15 +17,30 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
 
+
+    def loadmap(self):
+        game_folder = path.dirname(__file__)
+        resources_folder = path.join(game_folder, "resources")
+        map_folder = path.join(resources_folder, "maps")
+        self.map = Tilemap(path.join(map_folder, "start_map.tmx"))
+        #self.map = Tilemap(path.join(map_folder, "test_map.tmx"))
+        self.map_img = self.map.make_map()
+        self.maprect = self.map_img.get_rect()
+
+
+
     def new(self):
         # start a new game
+        self.loadmap()
         self.all_sprites = pg.sprite.Group()
-        self.tiles = pg.sprite.Group()
-        self.map = Map(MAP, self)
-        self.player = Player(self)
+        self.obstacles = pg.sprite.Group()
+        for tileobject in self.map.tmxdata.objects:
+            if tileobject.name == "wall":
+                Obstacle(tileobject.x, tileobject.y, tileobject.width, tileobject.height, self)
+            if tileobject.name == "player":
+                self.player = Player(self, tileobject.x, tileobject.y)
+
         self.camera = Camera(self.map.width, self.map.height)
-        self.all_sprites.add(self.player)
-        self.map.loadmap()
         self.run()
 
     def run(self):
@@ -50,7 +68,8 @@ class Game:
 
     def draw(self):
         # Game Loop - draw
-        self.screen.fill(BLACK)
+        self.screen.fill(WHITE)
+        self.screen.blit(self.map_img, self.camera.applyrect(self.maprect))
         #self.all_sprites.draw(self.screen)
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
@@ -65,4 +84,4 @@ class Game:
 
     def show_go_screen(self):
         # game over/continue
-        pass
+        pass 

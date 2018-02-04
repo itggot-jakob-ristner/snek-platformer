@@ -1,33 +1,30 @@
 import pygame as pg
 from settings import *
 from sprites import *
-
-class Map():
-    def __init__(self, mapdata, game):
-        self.tiles = mapdata[0]
-        self.spawn = mapdata[1]
-        self.game = game
-        self.data = self.tiles[::-1]
-        self.sprites = []
-        index_y = HEIGHT - TILESIZE
-        for y, line in enumerate(self.data):
-            for x, letter in enumerate(line):
-                if letter == "W":
-                    self.sprites.append((x * TILESIZE, index_y  - y * TILESIZE, TILESIZE, TILESIZE, WHITE))
-
-        self.tilewidth = len(self.tiles[0])
-        self.tileheight = len(self.tiles) 
-        self.width = self.tilewidth * TILESIZE
-        self.height = self.tileheight * TILESIZE
-        print(self.tilewidth, TILESIZE, self.width)
+from os import path
+import pytmx
 
 
-
-    def loadmap(self):
-        for plat in self.sprites:
-            p = Tile(*plat)
-            self.game.all_sprites.add(p)
-            self.game.tiles.add(p)
+class Tilemap:
+    def __init__(self, filename):
+        tm = pytmx.load_pygame(filename, pixelalpha=True)
+        self.width = tm.width * tm.tilewidth
+        self.height = tm.height * tm.tileheight
+        self.tmxdata = tm
+    
+    def render(self, surface):
+        ti = self.tmxdata.get_tile_image_by_gid
+        for layer in self.tmxdata.visible_layers:
+            if isinstance(layer, pytmx.TiledTileLayer):
+                for x, y, gid in layer:
+                    tile = ti(gid)
+                    if tile:
+                        surface.blit(tile, (x * self.tmxdata.tilewidth, y * self.tmxdata.tileheight))
+    
+    def make_map(self):
+        temp_surface = pg.Surface((self.width, self.height))
+        self.render(temp_surface)
+        return temp_surface       
     
 
 class Camera:
@@ -38,6 +35,9 @@ class Camera:
 
     def apply(self, entity):
         return entity.rect.move(self.camera.topleft)
+    
+    def applyrect(self, rect):
+        return rect.move(self.camera.topleft)
 
     def update(self, target):
         x = -target.rect.x + int(WIDTH / 2)
@@ -46,5 +46,6 @@ class Camera:
         # limit scrolling to map size
         x = min(0, x)  # left
         x = max(-(self.width - WIDTH), x)  # right
-        # y = max(-(self.height - HEIGHT), y)  # bottom
+        y = max(-(self.height - HEIGHT), y)  # bottom
         self.camera = pg.Rect(x, y, self.width, self.height)
+

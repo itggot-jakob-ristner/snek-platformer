@@ -28,19 +28,19 @@ YELLOW = (255, 255, 0)
 LIGHTBLUE = (0, 155, 155)
 
 #Tile settings
-TILESIZE= 32
+TILESIZE = 32
 
 
 
 
 #---Map drawing---#
 MAP = [
-    ["W          WWWWWWWW                 ",
+   ["W          WWWWWWWWWWWWWWWWWWWWW    ",
     "W                                   ",
     "W                                   ",
     "W                                   ",
     "WW                           WWWWWWW",
     "WWW      WWWWWWWWWWWWW       WWWWWWW",
     "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"
-    ], (WIDTH / 2, HEIGHT / 2)
+    ], (484, 512)
 ]

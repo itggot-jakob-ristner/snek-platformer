@@ -2,6 +2,7 @@ import pygame as pg
 import random
 from settings import *
 from sprites import *
+from tilemap import *
 
 class Game:
     def __init__(self):
@@ -16,13 +17,11 @@ class Game:
     def new(self):
         # start a new game
         self.all_sprites = pg.sprite.Group()
-        self.platforms = pg.sprite.Group()
+        self.tiles = pg.sprite.Group()
         self.map = Map(MAP, self)
         self.player = Player(self)
+        self.camera = Camera(self.map.width, self.map.height)
         self.all_sprites.add(self.player)
-
-        #self.load_platforms(PLATFORM_LIST2)
-        #self.load_platforms(PLATFORM_LIST)
         self.map.loadmap()
         self.run()
 
@@ -38,7 +37,7 @@ class Game:
     def update(self):
         # Game Loop - Update
         self.all_sprites.update()
-        # check if player hits a platform - only if falling
+        self.camera.update(self.player)
 
     def events(self):
         # Game Loop - events
@@ -48,14 +47,15 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_SPACE:
-                    self.player.jump()
 
     def draw(self):
         # Game Loop - draw
         self.screen.fill(BLACK)
-        self.all_sprites.draw(self.screen)
+        #self.all_sprites.draw(self.screen)
+        for sprite in self.all_sprites:
+            self.screen.blit(sprite.image, self.camera.apply(sprite))
+
+
         # *after* drawing everything, flip the display
         pg.display.flip()
 
@@ -66,11 +66,3 @@ class Game:
     def show_go_screen(self):
         # game over/continue
         pass
-
-g = Game()
-g.show_start_screen()
-while g.running:
-    g.new()
-    g.show_go_screen()
-
-pg.quit()

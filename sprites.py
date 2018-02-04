@@ -6,7 +6,7 @@ class Player(pg.sprite.Sprite):
     def __init__(self, game):
         pg.sprite.Sprite.__init__(self)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image = pg.Surface((32, 32))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.center = self.game.map.spawn
@@ -24,8 +24,6 @@ class Player(pg.sprite.Sprite):
 
 
     def update(self):
-        self.prev_pos = self.pos
-
         self.acc = vec(0, PLAYER_GRAV)
 
         keys = pg.key.get_pressed()
@@ -33,6 +31,8 @@ class Player(pg.sprite.Sprite):
             self.acc.x = -PLAYER_ACC
         if keys[pg.K_d]:
             self.acc.x = PLAYER_ACC
+        if keys[pg.K_SPACE]:
+            self.jump()
 
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
@@ -44,42 +44,24 @@ class Player(pg.sprite.Sprite):
 
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
-
-        #wrap around the sides of the screen
-        if self.pos.x > WIDTH:
-            self.pos.x = 0
-        if self.pos.x < 0:
-            self.pos.x = WIDTH
         
-        # if self.rect.right > self.game.map_length:
-        #     self.rect.right = self.game.map_length
-        #     self.pos = vec(self.rect.x, self.rect.y)
-        # elif self.rect.left < 0:
-        #     self.rect.left = 0
-        #     self.pos = vec(self.rect.x, self.rect.y)
-
-        # print(self.rect.left)
-
-
-        
-
         #Checks collisions with obstacles
         self.rect.x = self.pos.x
-        self.collide("x") 
+        self.collide("x", self.game.tiles) 
         self.rect.y = self.pos.y
-        self.collide("y")
+        self.collide("y", self.game.tiles)
 
         #Checks if the player is on the ground
         self.rect.y += 1
-        hits = pg.sprite.spritecollide(self, self.game.platforms, False)
+        hits = pg.sprite.spritecollide(self, self.game.tiles, False)
         if not hits:
             self.in_air = True
         self.rect.y -= 1
 
 
-    def collide(self, direction):
+    def collide(self, direction, group):
         #This function makes the sprite not pass through other sprites
-        hits = pg.sprite.spritecollide(self, self.game.platforms, False)
+        hits = pg.sprite.spritecollide(self, group, False)
         if hits:
             if direction == "y":
                 if self.vel.y > 0:
@@ -104,7 +86,7 @@ class Player(pg.sprite.Sprite):
                 self.in_air = False
         
 
-class Platform(pg.sprite.Sprite):
+class Tile(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, color):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.Surface((w, h))
@@ -114,25 +96,7 @@ class Platform(pg.sprite.Sprite):
         self.rect.y = y
 
 
-class Map():
-    def __init__(self, mapdata, game):
-        self.tiles = mapdata[0]
-        self.spawn = mapdata[1]
-        self.game = game
-        self.map_sprite = self.tiles[::-1]
-        self.map_length = len(self.map_sprite[0])
-        self.sprite = []
-        index_y = HEIGHT - TILESIZE
-        for y, line in enumerate(self.map_sprite):
-            for x, letter in enumerate(line):
-                if letter == "W":
-                    self.sprite.append((x * TILESIZE, index_y  - y * TILESIZE, TILESIZE, TILESIZE, WHITE))
-    
-    def loadmap(self):
-        for plat in self.sprite:
-            p = Platform(*plat)
-            self.game.all_sprites.add(p)
-            self.game.platforms.add(p)
+
 
 
     

@@ -136,6 +136,7 @@ class Player(pg.sprite.Sprite):
                     self.rect.left = hits[0].rect.right 
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
+            self.in_air = False
         
 
 class Obstacle(pg.sprite.Sprite):

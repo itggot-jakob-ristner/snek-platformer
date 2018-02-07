@@ -131,14 +131,14 @@ class Player(Entity):
 
         # The in y
         self.rect.y = self.pos.y
-        self.collide("y", self.game.obstacles)
+        
 
         # This damages the player when they land on top of a damaging sprite, gives them i-frames and bumps them up
         if self.collide("y", self.game.damaging_on_coll)[0] and not self.i_frame:
             self.hp -= 10
             self.damage_counter = 0
             self.vel.y = -10
-        
+        self.collide("y", self.game.obstacles)
 
 
 

@@ -10,6 +10,7 @@ PLAYER_FRICTION = -0.03
 PLAYER_GRAV = 0.4
 AIR_RESISTANCE = -0.02
 
+
 # Starting platforms
 PLATFORM_LIST = [(0, HEIGHT - 40, WIDTH, 40),
                  (WIDTH / 2 - 50, HEIGHT * 3 / 4, 100, 200),
@@ -36,6 +37,10 @@ PLAYERHP = 100
 
 # Healthabar settings
 BORDER_WIDTH = 3
+
+# Enemy settings
+NPCFRIC = -0.04
+NPCACC = 0.2
 
 
 

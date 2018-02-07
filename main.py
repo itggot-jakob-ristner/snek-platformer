@@ -32,9 +32,10 @@ class Game:
     def new(self):
         # start a new game
         self.loadmap()
+
         self.all_sprites = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
-        self.enemies = pg.sprite.Group()
+
         for tileobject in self.map.tmxdata.objects:
             if tileobject.name == "wall":
                 Obstacle(tileobject.x, tileobject.y, tileobject.width, tileobject.height, self)

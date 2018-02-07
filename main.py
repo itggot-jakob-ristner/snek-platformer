@@ -87,7 +87,6 @@ class Game:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         self.player.health_disp.draw()
 
-
         # *after* drawing everything, flip the display
         pg.display.flip()
     

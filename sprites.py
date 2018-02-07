@@ -117,11 +117,12 @@ class Player(Entity):
         self.collide("x", self.game.obstacles) 
 
         self.rect.y = self.pos.y
+        self.collide("y", self.game.obstacles)
         if self.collide("y", self.game.damaging_on_coll)[0] and not self.i_frame:
             self.hp -= 10
             self.damage_counter = 0
-            self.vel.y -= 10
-        self.collide("y", self.game.obstacles)
+            self.vel.y = -10
+        
 
 
 
@@ -171,7 +172,7 @@ class Npc(Entity):
         if coll[0] and not self.i_frame:
             self.player.hp -= 10
             self.player.damage_counter = 0
-            self.player.vel.x += self.facing.x * 10
+            self.player.vel.x = self.facing.x * 10
         self.collide("x", self.game.obstacles) 
 
         

@@ -6,7 +6,6 @@ import pytmx
 
 
 class Tilemap:
-    # This class handles the raw map and renders it with pytmx, pretty wierd syntax in some places
     def __init__(self, filename):
         tm = pytmx.load_pygame(filename, pixelalpha=True)
         self.width = tm.width * tm.tilewidth
@@ -29,7 +28,6 @@ class Tilemap:
     
 
 class Camera:
-    # This class is what makes the camera scroll with the player
     def __init__(self, width, height):
         self.camera = pg.Rect(0, 0, width, height)
         self.width = width

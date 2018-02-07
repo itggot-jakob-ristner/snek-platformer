@@ -19,7 +19,6 @@ class Game:
 
 
     def loadmap(self):
-        # This loads the map, pretty self explanatory
         game_folder = path.dirname(__file__)
         resources_folder = path.join(game_folder, "resources")
         map_folder = path.join(resources_folder, "maps")
@@ -40,7 +39,6 @@ class Game:
         self.damaging_on_coll = pg.sprite.Group()
         self.players = pg.sprite.Group()
 
-        # Adds objects in to the game based on the object layer in the .tmx file loaded
         for tileobject in self.map.tmxdata.objects:
             if tileobject.name == "wall":
                 Obstacle(tileobject.x, tileobject.y, tileobject.width, tileobject.height, self)
@@ -89,13 +87,10 @@ class Game:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
         self.player.health_disp.draw()
 
-        # after drawing everything, flip the display
+        # *after* drawing everything, flip the display
         pg.display.flip()
     
     def pause(self):
-        # This just freezes the display and ads an opaque black rectangle on top
-        # necessary for moving tghe window around without everything falling
-        # through the map when you stop moving it
         pause_screen = pg.Surface((WIDTH, HEIGHT))
         pause_screen.set_alpha(180)
         pause_screen.fill(BLACK)

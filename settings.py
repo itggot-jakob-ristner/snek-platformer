@@ -31,4 +31,11 @@ LIGHTBLUE = (0, 155, 155)
 TILESIZE = 32
 
 
+# Gameplay setting
+PLAYERHP = 100
+
+# Healthabar settings
+BORDER_WIDTH = 3
+
+
 

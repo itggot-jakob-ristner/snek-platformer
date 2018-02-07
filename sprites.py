@@ -11,14 +11,19 @@ class Player(pg.sprite.Sprite):
         game_folder = path.dirname(__file__)
         recoures_folder = path.join(game_folder, "resources")
         player_models_folder = path.join(recoures_folder, "player_models")
-        self.img = path.join(player_models_folder, "player32.png")
-        self.image = pg.image.load(self.img)
+        self.images = [pg.image.load(path.join(player_models_folder, "player_right.png")), pg.image.load(path.join(player_models_folder, "player_left.png"))]
+        self.image = self.images[0]
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
+        self.rect.topleft = (x, y)
         self.pos = self.rect
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        self.hp = PLAYERHP
+        self.max_hp = self.hp
         self.in_air = True
+        self.facing = vec(0, 1)
+        self.health_disp = Healthbar(self)
+        self.inventory = []
 
 
     def jump(self):
@@ -34,13 +39,23 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
         if keys[pg.K_a]:
             self.acc.x = -PLAYER_ACC
+            self.image = self.images[1]
         if keys[pg.K_d]:
             self.acc.x = PLAYER_ACC
+            self.image = self.images[0]
         if keys[pg.K_SPACE]:
             self.jump()
+        if keys[pg.K_r]:
+            self.hp -= 1
 
         if self.vel.y < 0:
             self.in_air = True
+        
+        if self.vel.x > 0:
+            self.facing = vec(0, 1)
+        elif self.vel.x < 0:
+            self.facing = vec(0, 1)
+
 
 
         # apply friction
@@ -99,14 +114,6 @@ class Player(pg.sprite.Sprite):
                     self.vel.x += self.prev_vel.x
         '''
 
-
-
-
-
-        
-       
-
-
     def collide(self, direction, group):
         #This function makes the sprite not pass through other sprites
         hits = pg.sprite.spritecollide(self, group, False)
@@ -117,6 +124,7 @@ class Player(pg.sprite.Sprite):
                     self.vel.y = 0
                     self.in_air = False
                     self.pos = vec(self.rect.x, self.rect.y)
+
                 elif self.vel.y < 0:
                     self.rect.top = hits[0].rect.bottom
                     self.vel.y = 0
@@ -132,6 +140,27 @@ class Player(pg.sprite.Sprite):
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
             #self.in_air = False
+
+class Npc(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = [game.all_sprites, game.enemies, game.obstacles]
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((32, 64))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.pos = self.rect
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.hp = 100
+        self.max_hp = self.hp
+        self.in_air = True
+        self.facing = vec(0, 1)
+
+    
+    def update(self):
+        pass
         
 
 class Obstacle(pg.sprite.Sprite):
@@ -144,6 +173,35 @@ class Obstacle(pg.sprite.Sprite):
         self.rect.y = y
         self.x = x
         self.y = y
+
+class Healthbar:
+    def __init__(self, player):
+        self.display_hp = player.hp
+        self.display_max_hp = player.max_hp
+        self.player = player
+        self.game = player.game
+        self.border_rect = pg.Surface((self.display_max_hp * 3 + 6, 26))
+        self.border_rect.fill(WHITE)
+        self.background = pg.Surface((self.display_max_hp * 3, 20))
+        self.background.fill(RED)
+        self.hp_rect = pg.Surface((self.display_hp * 3, 20))
+        self.hp_rect.fill(GREEN)
+        
+    
+    def update(self):
+        if self.hp_rect.get_width() != self.player.hp * 3:
+            self.hp_rect = pg.Surface((self.player.hp * 3, 20))
+            self.hp_rect.fill(GREEN)
+
+
+    def draw(self):
+        self.game.screen.blit(self.border_rect, (20, 20))
+        self.game.screen.blit(self.background, (23, 23))
+        self.game.screen.blit(self.hp_rect, (23, 23))
+        
+        
+        
+
 
 
 

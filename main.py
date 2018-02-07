@@ -34,11 +34,15 @@ class Game:
         self.loadmap()
         self.all_sprites = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
         for tileobject in self.map.tmxdata.objects:
             if tileobject.name == "wall":
                 Obstacle(tileobject.x, tileobject.y, tileobject.width, tileobject.height, self)
-            if tileobject.name == "player":
+            elif tileobject.name == "player":
                 self.player = Player(self, tileobject.x, tileobject.y)
+            elif tileobject.name == "enemy":
+                Npc(self, tileobject.x, tileobject.y)
+            
 
         self.camera = Camera(self.map.width, self.map.height)
         self.run()
@@ -56,6 +60,7 @@ class Game:
         # Game Loop - Update
         self.all_sprites.update()
         self.camera.update(self.player)
+        self.player.health_disp.update()
 
     def events(self):
         # Game Loop - events
@@ -72,6 +77,7 @@ class Game:
         self.screen.blit(self.map_img, self.camera.applyrect(self.maprect))
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
+        self.player.health_disp.draw()
 
 
         # *after* drawing everything, flip the display

@@ -1,13 +1,13 @@
  
 TITLE = "Snek-chad vs the world"
-WIDTH = 1024
-HEIGHT = 768
+WIDTH = 1600
+HEIGHT = 960
 FPS = 120
 
 # Player properties
 PLAYER_ACC = 0.3
-PLAYER_FRICTION = -0.04
-PLAYER_GRAV = 0.6
+PLAYER_FRICTION = -0.03
+PLAYER_GRAV = 0.4
 AIR_RESISTANCE = -0.02
 
 # Starting platforms
@@ -28,7 +28,7 @@ YELLOW = (255, 255, 0)
 LIGHTBLUE = (0, 155, 155)
 
 #Tile settings
-TILESIZE = 16
+TILESIZE = 32
 
 
 

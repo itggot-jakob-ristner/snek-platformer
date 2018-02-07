@@ -11,7 +11,7 @@ class Player(pg.sprite.Sprite):
         game_folder = path.dirname(__file__)
         recoures_folder = path.join(game_folder, "resources")
         player_models_folder = path.join(recoures_folder, "player_models")
-        self.img = path.join(player_models_folder, "player.png")
+        self.img = path.join(player_models_folder, "player32.png")
         self.image = pg.image.load(self.img)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -38,13 +38,6 @@ class Player(pg.sprite.Sprite):
             self.acc.x = PLAYER_ACC
         if keys[pg.K_SPACE]:
             self.jump()
-
-        #Checks if the player is on the ground
-        # self.rect.y += 1
-        # hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
-        # if not hits:
-        #     self.in_air = True
-        # self.rect.y -= 1
 
         if self.vel.y < 0:
             self.in_air = True
@@ -73,6 +66,7 @@ class Player(pg.sprite.Sprite):
 
 
         #Allows the player tow walk onto small tiles
+        '''
         if not self.in_air:
             if self.vel.x > 0:
                 self.rect.y -= 1
@@ -103,6 +97,7 @@ class Player(pg.sprite.Sprite):
                     self.rect.x -= 1
                     self.pos = vec(self.rect.x, self.rect.y)
                     self.vel.x += self.prev_vel.x
+        '''
 
 
 
@@ -136,7 +131,7 @@ class Player(pg.sprite.Sprite):
                     self.rect.left = hits[0].rect.right 
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
-            self.in_air = False
+            #self.in_air = False
         
 
 class Obstacle(pg.sprite.Sprite):

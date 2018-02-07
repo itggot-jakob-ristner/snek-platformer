@@ -70,7 +70,6 @@ class Game:
         # Game Loop - draw
         self.screen.fill(WHITE)
         self.screen.blit(self.map_img, self.camera.applyrect(self.maprect))
-        #self.all_sprites.draw(self.screen)
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
 

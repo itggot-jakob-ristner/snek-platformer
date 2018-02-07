@@ -136,5 +136,6 @@
   <object id="60" name="player" x="1536" y="3104" width="32" height="32"/>
   <object id="61" name="enemy" x="960" y="3008" width="32" height="32"/>
   <object id="64" name="wall" x="576" y="3136" width="32" height="32"/>
+  <object id="66" name="enemy" x="736" y="2816" width="32" height="32"/>
  </objectgroup>
 </map>

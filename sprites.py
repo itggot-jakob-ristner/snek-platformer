@@ -19,7 +19,9 @@ class Entity(pg.sprite.Sprite):
         self.hp = PLAYERHP
         self.max_hp = self.hp
         self.in_air = True
-        self.facing = vec(0, 1)
+        self.facing = vec(1, 0)
+        self.damage_counter = 0
+        self.i_frame = False
     
     def jump(self):
         # jump only if standing on a platform
@@ -51,7 +53,9 @@ class Entity(pg.sprite.Sprite):
                     self.rect.left = hits[0].rect.right 
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
-            #self.in_air = False
+            return [True, hits[0]]
+        return [False]
+
     
 
 
@@ -63,12 +67,21 @@ class Player(Entity):
         recoures_folder = path.join(game_folder, "resources")
         player_models_folder = path.join(recoures_folder, "player_models")
         images = [pg.image.load(path.join(player_models_folder, "player_right.png")), pg.image.load(path.join(player_models_folder, "player_left.png"))]
-        super().__init__(game, x, y, [game.obstacles, game.all_sprites], images, PLAYERHP)
+        super().__init__(game, x, y, [game.players, game.all_sprites], images, PLAYERHP)
         self.health_disp = Healthbar(self)
         self.inventory = []
 
 
     def update(self):
+        if self.hp <= 0:
+            self.game.playing = False
+
+        self.damage_counter += 1
+        if self.damage_counter * (self.game.dt / 20) > 20:
+            self.i_frame = False
+        else: 
+            self.i_frame = True
+
         self.acc = vec(0, PLAYER_GRAV)
         keys = pg.key.get_pressed()
         if keys[pg.K_a]:
@@ -88,25 +101,33 @@ class Player(Entity):
             self.facing = vec(0, 1)
         elif self.vel.x < 0:
             self.facing = vec(0, 1)
+
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
         # makes friction work both directions :P
-        self.vel += self.acc
+        self.vel += self.acc * (self.game.dt / 20)
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
-        #Checks collisions with obstacles
+
+
+        #Checks collisions with obstacles and enemies for damage
         self.rect.x = self.pos.x
         self.collide("x", self.game.obstacles) 
+
         self.rect.y = self.pos.y
+        if self.collide("y", self.game.damaging_on_coll)[0] and not self.i_frame:
+            self.hp -= 10
+            self.damage_counter = 0
+            self.vel.y -= 10
         self.collide("y", self.game.obstacles)
 
 
 
 class Npc(Entity):
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.enemies], [pg.Surface((32, 64))], PLAYERHP)
+        super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.damaging_on_coll], [pg.Surface((32, 64))], PLAYERHP)
         self.image.fill(RED)
         self.player = self.game.player
 
@@ -117,8 +138,10 @@ class Npc(Entity):
 
         if direction.x > 0:
             self.acc.x = NPCACC
+            self.facing.x = 1
         elif direction.x < 0:
             self.acc.x = -NPCACC
+            self.facing.x = -1
         if self.vel.y < 0:
             self.in_air = True
         
@@ -133,21 +156,31 @@ class Npc(Entity):
             self.jump()
 
 
-        if self.vel.x > 0:
-            self.facing = vec(0, 1)
-        elif self.vel.x < 0:
-            self.facing = vec(0, 1)
-
         self.acc.x += self.vel.x * NPCFRIC
-        self.vel += self.acc
+        self.vel += self.acc * (self.game.dt / 20)
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
+
+
+       
         self.rect.x = self.pos.x
+
+        coll = self.collide("x", self.game.players)
+        if coll[0] and not self.i_frame:
+            self.player.hp -= 10
+            self.player.damage_counter = 0
+            self.player.vel.x += self.facing.x * 10
         self.collide("x", self.game.obstacles) 
+
+        
         self.rect.y = self.pos.y
-        self.collide("y", self.game.obstacles)
+        self.collide("y", self.game.walls)
+
+        
+
+    
 
 
 class Obstacle(pg.sprite.Sprite):
@@ -176,6 +209,8 @@ class Healthbar:
         
     
     def update(self):
+        if self.player.hp <= 0:
+            self.player.hp = 0
         if self.hp_rect.get_width() != self.player.hp * 3:
             self.hp_rect = pg.Surface((self.player.hp * 3, 20))
             self.hp_rect.fill(GREEN)
@@ -185,7 +220,7 @@ class Healthbar:
         self.game.screen.blit(self.border_rect, (20, 20))
         self.game.screen.blit(self.background, (23, 23))
         self.game.screen.blit(self.hp_rect, (23, 23))
-        
+                
         
         
 

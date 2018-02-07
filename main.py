@@ -36,7 +36,8 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        self.enemies = pg.sprite.Group()
+        self.damaging_on_coll = pg.sprite.Group()
+        self.players = pg.sprite.Group()
 
         for tileobject in self.map.tmxdata.objects:
             if tileobject.name == "wall":
@@ -54,7 +55,7 @@ class Game:
         # Game Loop
         self.playing = True
         while self.playing:
-            self.dt = self.clock.tick(FPS)
+            self.dt = self.clock.tick()
             self.events()
             self.update()
             self.draw()
@@ -72,7 +73,11 @@ class Game:
             if event.type == pg.QUIT:
                 if self.playing:
                     self.playing = False
-                self.running = False
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    self.pause()
+
+
 
     def draw(self):
         # Game Loop - draw
@@ -85,6 +90,24 @@ class Game:
 
         # *after* drawing everything, flip the display
         pg.display.flip()
+    
+    def pause(self):
+        pause_screen = pg.Surface((WIDTH, HEIGHT))
+        pause_screen.set_alpha(180)
+        pause_screen.fill(BLACK)
+        self.screen.blit(pause_screen, (0, 0))
+        paused = True
+        while paused:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    if self.playing:
+                        self.playing = False
+                    paused = False
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        paused = False
+            self.clock.tick()
+            pg.display.flip()
 
     def show_start_screen(self):
         # game splash/start screen
@@ -92,4 +115,5 @@ class Game:
 
     def show_go_screen(self):
         # game over/continue
-        pass 
+        print("You ded")
+        self.running = False

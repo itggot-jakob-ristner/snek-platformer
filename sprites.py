@@ -3,21 +3,16 @@ from settings import *
 from os import path
 vec = pg.math.Vector2
 
-
-
-
-class Player(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = [game.all_sprites, game.obstacles]
+class Entity(pg.sprite.Sprite):
+    # Superclass for all movinf entitys; players and enemies etc
+    def __init__(self, game, x, y, groups, images, hp):
+        self.groups = groups
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        game_folder = path.dirname(__file__)
-        recoures_folder = path.join(game_folder, "resources")
-        player_models_folder = path.join(recoures_folder, "player_models")
-        self.images = [pg.image.load(path.join(player_models_folder, "player_right.png")), pg.image.load(path.join(player_models_folder, "player_left.png"))]
+        self.images = images
         self.image = self.images[0]
         self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
+        self.rect.topleft = vec(x, y)
         self.pos = vec(self.rect.x, self.rect.y)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
@@ -25,20 +20,56 @@ class Player(pg.sprite.Sprite):
         self.max_hp = self.hp
         self.in_air = True
         self.facing = vec(0, 1)
-        self.health_disp = Healthbar(self)
-        self.inventory = []
-
-
+    
     def jump(self):
         # jump only if standing on a platform
         if not self.in_air:
             self.vel.y = -25
             self.in_air = True
+    
+    def collide(self, direction, group):
+        #This function makes the sprite not pass through other sprites
+        hits = pg.sprite.spritecollide(self, group, False)
+        hits = [x for x in hits if x != self]
+        if hits:
+            if direction == "y":
+                if self.vel.y > 0:
+                    self.rect.bottom = hits[0].rect.top
+                    self.vel.y = 0
+                    self.in_air = False
+                    self.pos = vec(self.rect.x, self.rect.y)
+                elif self.vel.y < 0:
+                    self.rect.top = hits[0].rect.bottom
+                    self.vel.y = 0
+                    self.pos = vec(self.rect.x, self.rect.y)
+            elif direction == "x":
+                if self.vel.x > 0:
+                    self.rect.right = hits[0].rect.left
+                    self.vel.x = 0
+                    self.pos = vec(self.rect.x, self.rect.y)
+                if self.vel.x < 0:
+                    self.rect.left = hits[0].rect.right 
+                    self.vel.x = 0
+                    self.pos = vec(self.rect.x, self.rect.y)
+            #self.in_air = False
+    
+
+
+
+
+class Player(Entity):
+    def __init__(self, game, x, y):
+        game_folder = path.dirname(__file__)
+        recoures_folder = path.join(game_folder, "resources")
+        player_models_folder = path.join(recoures_folder, "player_models")
+        images = [pg.image.load(path.join(player_models_folder, "player_right.png")), pg.image.load(path.join(player_models_folder, "player_left.png"))]
+        super().__init__(game, x, y, [game.obstacles, game.all_sprites], images, PLAYERHP)
+        self.health_disp = Healthbar(self)
+        self.inventory = []
 
 
     def update(self):
         self.acc = vec(0, PLAYER_GRAV)
-
         keys = pg.key.get_pressed()
         if keys[pg.K_a]:
             self.acc.x = -PLAYER_ACC
@@ -50,7 +81,6 @@ class Player(pg.sprite.Sprite):
             self.jump()
         if keys[pg.K_r]:
             self.hp -= 1
-
         if self.vel.y < 0:
             self.in_air = True
         
@@ -58,24 +88,15 @@ class Player(pg.sprite.Sprite):
             self.facing = vec(0, 1)
         elif self.vel.x < 0:
             self.facing = vec(0, 1)
-
-
-
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
-       
         # makes friction work both directions :P
         self.vel += self.acc
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
-
-        self.prev_vel = vec(self.vel.x, self.vel.y)
-
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
-
         #Checks collisions with obstacles
-
         self.rect.x = self.pos.x
         self.collide("x", self.game.obstacles) 
         self.rect.y = self.pos.y
@@ -83,111 +104,44 @@ class Player(pg.sprite.Sprite):
 
 
 
-        #Allows the player tow walk onto small tiles
-        '''
-        if not self.in_air:
-            if self.vel.x > 0:
-                self.rect.y -= 1
-                self.rect.x += 1
-                hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
-                self.rect.y -= TILESIZE
-                hits2 = pg.sprite.spritecollide(self, self.game.obstacles, False)
-                self.rect.y += TILESIZE + 1
-                self.rect.x -= 1
-
-                if hits and not hits2:
-                    self.rect.bottom = hits[0].rect.y
-                    self.rect.x += 1
-                    self.pos = vec(self.rect.x, self.rect.y)
-                    self.vel.x += self.prev_vel.x
-
-            elif self.vel.x < 0:
-                self.rect.y -= 1
-                self.rect.x -= 1
-                hits = pg.sprite.spritecollide(self, self.game.obstacles, False)
-                self.rect.y -= TILESIZE
-                hits2 = pg.sprite.spritecollide(self, self.game.obstacles, False)
-                self.rect.y += TILESIZE + 1
-                self.rect.x += 1
-
-                if hits and not hits2:
-                    self.rect.bottom = hits[0].rect.y
-                    self.rect.x -= 1
-                    self.pos = vec(self.rect.x, self.rect.y)
-                    self.vel.x += self.prev_vel.x
-        '''
-
-    def collide(self, direction, group):
-        #This function makes the sprite not pass through other sprites
-        hits = pg.sprite.spritecollide(self, group, False)
-        hits = [x for x in hits if x != self]
-        if hits:
-            if direction == "y":
-                if self.vel.y > 0:
-                    self.rect.bottom = hits[0].rect.top
-                    self.vel.y = 0
-                    self.in_air = False
-                    self.pos = vec(self.rect.x, self.rect.y)
-
-                elif self.vel.y < 0:
-                    self.rect.top = hits[0].rect.bottom
-                    self.vel.y = 0
-                    self.pos = vec(self.rect.x, self.rect.y)
-
-            elif direction == "x":
-                if self.vel.x > 0:
-                    self.rect.right = hits[0].rect.left
-                    self.vel.x = 0
-                    self.pos = vec(self.rect.x, self.rect.y)
-                if self.vel.x < 0:
-                    self.rect.left = hits[0].rect.right 
-                    self.vel.x = 0
-                    self.pos = vec(self.rect.x, self.rect.y)
-            #self.in_air = False
-
-class Npc(pg.sprite.Sprite):
+class Npc(Entity):
     def __init__(self, game, x, y):
-        self.groups = [game.all_sprites, game.obstacles]
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((32, 64))
+        super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.enemies], [pg.Surface((32, 64))], PLAYERHP)
         self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.pos = vec(self.rect.x, self.rect.y)
-        self.vel = vec(0, 0)
-        self.acc = vec(0, 0)
-        self.hp = 100
-        self.max_hp = self.hp
-        self.in_air = True
-        self.facing = vec(0, 1)
         self.player = self.game.player
 
     
     def update(self):
-
         self.acc = vec(0, PLAYER_GRAV)
-
         direction = self.player.pos - self.pos
 
         if direction.x > 0:
             self.acc.x = NPCACC
         elif direction.x < 0:
             self.acc.x = -NPCACC
-
         if self.vel.y < 0:
             self.in_air = True
+        
+        self.rect.x += 1
+        hits_right = pg.sprite.spritecollide(self, self.game.walls, False)
+        self.rect.x -= 2
+        hits_left = pg.sprite.spritecollide(self, self.game.walls, False)
+        self.rect.x += 1
+        if hits_right and self.vel.x > 0:
+            self.jump()
+        elif hits_left and self.vel.x < 0:
+            self.jump()
+
+
         if self.vel.x > 0:
             self.facing = vec(0, 1)
         elif self.vel.x < 0:
             self.facing = vec(0, 1)
-        
-        self.acc.x += self.vel.x * NPCFRIC
 
+        self.acc.x += self.vel.x * NPCFRIC
         self.vel += self.acc
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
-
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
         self.rect.x = self.pos.x
@@ -195,52 +149,10 @@ class Npc(pg.sprite.Sprite):
         self.rect.y = self.pos.y
         self.collide("y", self.game.obstacles)
 
-    def jump(self):
-        # jump only if standing on a platform
-        if not self.in_air:
-            self.vel.y = -25
-            self.in_air = True
-    
-    def collide(self, direction, group):
-        #This function makes the sprite not pass through other sprites
-        hits = pg.sprite.spritecollide(self, group, False)
-        hits = [x for x in hits if x != self]
-        if hits:
-            if direction == "y":
-                if self.vel.y > 0:
-                    self.rect.bottom = hits[0].rect.top
-                    self.vel.y = 0
-                    self.in_air = False
-                    self.pos = vec(self.rect.x, self.rect.y)
-
-                elif self.vel.y < 0:
-                    self.rect.top = hits[0].rect.bottom
-                    self.vel.y = 0
-                    self.pos = vec(self.rect.x, self.rect.y)
-
-            elif direction == "x":
-                if self.vel.x > 0:
-                    self.rect.right = hits[0].rect.left
-                    self.vel.x = 0
-                    self.pos = vec(self.rect.x, self.rect.y)
-                if self.vel.x < 0:
-                    self.rect.left = hits[0].rect.right 
-                    self.vel.x = 0
-                    self.pos = vec(self.rect.x, self.rect.y)
-                return True;
-            return False
-            #self.in_air = False
-        
-        
-    def draw(self):
-        super().draw()
-        
-
-        
 
 class Obstacle(pg.sprite.Sprite):
     def __init__(self, x, y, w, h, game):
-        self.groups = game.obstacles
+        self.groups = [game.obstacles, game.walls]
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.rect = pg.Rect(x, y, w, h)

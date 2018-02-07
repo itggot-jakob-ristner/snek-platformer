@@ -35,6 +35,8 @@ class Game:
 
         self.all_sprites = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
+        self.walls = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
 
         for tileobject in self.map.tmxdata.objects:
             if tileobject.name == "wall":

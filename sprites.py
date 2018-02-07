@@ -30,26 +30,26 @@ class Entity(pg.sprite.Sprite):
             self.in_air = True
     
     def collide(self, direction, group):
-        #This function makes the sprite not pass through other sprites
+        #This function makes the sprite not pass through other sprites in a group
         hits = pg.sprite.spritecollide(self, group, False)
         hits = [x for x in hits if x != self]
         if hits:
             if direction == "y":
-                if self.vel.y > 0:
+                if self.vel.y > 0: # going down; colliding with top of rect
                     self.rect.bottom = hits[0].rect.top
                     self.vel.y = 0
                     self.in_air = False
                     self.pos = vec(self.rect.x, self.rect.y)
-                elif self.vel.y < 0:
+                elif self.vel.y < 0: # going upwards; colliding with bottom of rect
                     self.rect.top = hits[0].rect.bottom
                     self.vel.y = 0
                     self.pos = vec(self.rect.x, self.rect.y)
             elif direction == "x":
-                if self.vel.x > 0:
+                if self.vel.x > 0: # going right; colliding with left of rect
                     self.rect.right = hits[0].rect.left
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
-                if self.vel.x < 0:
+                if self.vel.x < 0: # going left; colliding with right of rect
                     self.rect.left = hits[0].rect.right 
                     self.vel.x = 0
                     self.pos = vec(self.rect.x, self.rect.y)
@@ -62,6 +62,7 @@ class Entity(pg.sprite.Sprite):
 
 
 class Player(Entity):
+    # This is the player class, the one you control.
     def __init__(self, game, x, y):
         game_folder = path.dirname(__file__)
         recoures_folder = path.join(game_folder, "resources")
@@ -73,21 +74,30 @@ class Player(Entity):
 
 
     def update(self):
+        
+        # this stops the game from continiung when you die
         if self.hp <= 0:
             self.game.playing = False
 
+        # This gives your player "i-frames" ie invincible frames where you cannot take damage
+        # so that damage doesnt stack on one collosion
         self.damage_counter += 1
-        if self.damage_counter * (self.game.dt / 20) > 20:
+        if self.damage_counter * (self.game.dt / 20) > 20: # self.game.dt / 20 makes all timing time based instead of frame based
             self.i_frame = False
         else: 
             self.i_frame = True
 
+        # Resets the acceleration every tick
         self.acc = vec(0, PLAYER_GRAV)
+
+        # Basic inputs; event loop for the player
         keys = pg.key.get_pressed()
         if keys[pg.K_a]:
+            # Switches the image when you move from left to right
             self.acc.x = -PLAYER_ACC
             self.image = self.images[1]
         if keys[pg.K_d]:
+            #-:-
             self.acc.x = PLAYER_ACC
             self.image = self.images[0]
         if keys[pg.K_SPACE]:
@@ -104,20 +114,26 @@ class Player(Entity):
 
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
-        # makes friction work both directions :P
+
+        # apply acceleration to the velocity
         self.vel += self.acc * (self.game.dt / 20)
+
+        # makes friction work both directions because of floating point errors in python
         d_x = int(self.vel.x + 0.5 * self.acc.x)
         d_y = int(self.vel.y + 0.5 * self.acc.y)
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
 
 
-        #Checks collisions with obstacles and enemies for damage
+        # First check collisions in x
         self.rect.x = self.pos.x
         self.collide("x", self.game.obstacles) 
 
+        # The in y
         self.rect.y = self.pos.y
         self.collide("y", self.game.obstacles)
+
+        # This damages the player when they land on top of a damaging sprite, gives them i-frames and bumps them up
         if self.collide("y", self.game.damaging_on_coll)[0] and not self.i_frame:
             self.hp -= 10
             self.damage_counter = 0
@@ -127,6 +143,7 @@ class Player(Entity):
 
 
 class Npc(Entity):
+    # This will eventually be a superclass for all entitys that are not the player but currently is just the enemies
     def __init__(self, game, x, y):
         super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.damaging_on_coll], [pg.Surface((32, 64))], PLAYERHP)
         self.image.fill(RED)
@@ -134,9 +151,13 @@ class Npc(Entity):
 
     
     def update(self):
+        
         self.acc = vec(0, PLAYER_GRAV)
+
+        # direction is a vector that will always point towards tha player
         direction = self.player.pos - self.pos
 
+        # Use the direction vector to control the movement of tha enemies, will eventually add aggro range
         if direction.x > 0:
             self.acc.x = NPCACC
             self.facing.x = 1
@@ -146,6 +167,7 @@ class Npc(Entity):
         if self.vel.y < 0:
             self.in_air = True
         
+        # This causes the enemy to jump if there is a wall between the enemy and player
         self.rect.x += 1
         hits_right = pg.sprite.spritecollide(self, self.game.walls, False)
         self.rect.x -= 2
@@ -168,6 +190,8 @@ class Npc(Entity):
        
         self.rect.x = self.pos.x
 
+        # the damaging collisions in x are handled by the enemy, why does this work
+        # better than just doing both in the player.update() you might ask? I DONT FUCKING KNOW
         coll = self.collide("x", self.game.players)
         if coll[0] and not self.i_frame:
             self.player.hp -= 10
@@ -185,6 +209,7 @@ class Npc(Entity):
 
 
 class Obstacle(pg.sprite.Sprite):
+    # This is just the class for walls you run into
     def __init__(self, x, y, w, h, game):
         self.groups = [game.obstacles, game.walls]
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -196,6 +221,7 @@ class Obstacle(pg.sprite.Sprite):
         self.y = y
 
 class Healthbar:
+    # The healthbar displayed in the top right
     def __init__(self, player):
         self.display_hp = player.hp
         self.display_max_hp = player.max_hp
@@ -210,6 +236,8 @@ class Healthbar:
         
     
     def update(self):
+        # It crashes if you try to draw a rect with negative dimensions
+        # and so we reset the hp if it dips below zero
         if self.player.hp <= 0:
             self.player.hp = 0
         if self.hp_rect.get_width() != self.player.hp * 3:
@@ -218,6 +246,7 @@ class Healthbar:
 
 
     def draw(self):
+        # Drawing the healthbar
         self.game.screen.blit(self.border_rect, (20, 20))
         self.game.screen.blit(self.background, (23, 23))
         self.game.screen.blit(self.hp_rect, (23, 23))

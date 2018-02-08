@@ -4,6 +4,7 @@ import pytmx
 from settings import *
 from sprites import *
 from tilemap import *
+from gui import * 
 from os import path
 
 
@@ -16,6 +17,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.running = True
+        self.rect = self.screen.get_rect()
 
 
     def loadmap(self):
@@ -96,12 +98,15 @@ class Game:
         # This just freezes the display and ads an opaque black rectangle on top
         # necessary for moving tghe window around without everything falling
         # through the map when you stop moving it
+        self.pause_text = Menutext("Game Paused", self.screen, 24)
+        self.pause_text.rect.center = self.rect.center
         pause_screen = pg.Surface((WIDTH, HEIGHT))
         pause_screen.set_alpha(180)
         pause_screen.fill(BLACK)
         self.screen.blit(pause_screen, (0, 0))
         paused = True
         while paused:
+            self.pause_text.draw(self.pause_text.rect)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     if self.playing:

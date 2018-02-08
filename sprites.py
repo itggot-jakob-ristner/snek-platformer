@@ -1,6 +1,7 @@
 import pygame as pg
 from settings import *
 from os import path
+from gui import * 
 vec = pg.math.Vector2
 
 class Entity(pg.sprite.Sprite):
@@ -224,29 +225,36 @@ class Healthbar:
         self.display_max_hp = player.max_hp
         self.player = player
         self.game = player.game
-        self.border_rect = pg.Surface((self.display_max_hp * 3 + 6, 26))
-        self.border_rect.fill(WHITE)
+        self.border = pg.Surface((self.display_max_hp * 3 + 6, 26))
+        self.border.fill(YELLOW)
+        self.border_rect = self.border.get_rect()
         self.background = pg.Surface((self.display_max_hp * 3, 20))
-        self.background.fill(RED)
+        self.background.fill(BLACK)
         self.hp_rect = pg.Surface((self.display_hp * 3, 20))
-        self.hp_rect.fill(GREEN)
-        
+        self.hp_rect.fill(RED)
+        self.text = Menutext(f"HP:{self.player.hp} / {self.player.max_hp}", self.game.screen, 16)
+        self.text.rect.midtop = self.border_rect.midbottom 
+        self.text.rect.y += 10
     
     def update(self):
         # It crashes if you try to draw a rect with negative dimensions
         # and so we reset the hp if it dips below zero
         if self.player.hp <= 0:
             self.player.hp = 0
+        self.text.update(f"HP:{self.player.hp} / {self.player.max_hp}")
+        self.text.rect.midtop = self.border_rect.midbottom
+        self.text.rect.y += 30
         if self.hp_rect.get_width() != self.player.hp * 3:
             self.hp_rect = pg.Surface((self.player.hp * 3, 20))
-            self.hp_rect.fill(GREEN)
+            self.hp_rect.fill(RED)
 
 
     def draw(self):
         # Drawing the healthbar
-        self.game.screen.blit(self.border_rect, (20, 20))
+        self.game.screen.blit(self.border, (20, 20))
         self.game.screen.blit(self.background, (23, 23))
         self.game.screen.blit(self.hp_rect, (23, 23))
+        self.text.draw(self.text.rect)
                 
         
         

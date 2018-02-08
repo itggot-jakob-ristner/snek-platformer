@@ -22,6 +22,7 @@ class Entity(pg.sprite.Sprite):
         self.facing = vec(1, 0)
         self.damage_counter = 0
         self.i_frame = False
+        self.prev_vel = vec(0, 0)
     
     def jump(self):
         # jump only if standing on a platform
@@ -123,15 +124,13 @@ class Player(Entity):
         self.pos.x += d_x * (self.game.dt / 20)
         self.pos.y += d_y * (self.game.dt / 20)
 
-
+        self.prev_vel.x = self.vel.x
         # First check collisions in x
         self.rect.x = self.pos.x
         self.collide("x", self.game.obstacles) 
 
-        # The in y
+        # Then y collisions
         self.rect.y = self.pos.y
-        
-
         # This damages the player when they land on top of a damaging sprite, gives them i-frames and bumps them up
         if self.collide("y", self.game.damaging_on_coll)[0] and not self.i_frame:
             self.hp -= 10
@@ -195,13 +194,9 @@ class Npc(Entity):
         if coll[0] and not self.player.i_frame:
             self.player.hp -= 10
             self.player.damage_counter = 0
-            if direction.y > 0:
-                self.player.vel.x = self.facing.x * -10
-            elif direction.y < 0:
-                self.player.vel.x = self.facing.x * 10
+            self.player.vel.x = self.facing.x * 10
         self.collide("x", self.game.obstacles) 
 
-        
         self.rect.y = self.pos.y
         self.collide("y", self.game.obstacles)
 

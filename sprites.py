@@ -200,7 +200,7 @@ class Npc(Entity):
 
         
         self.rect.y = self.pos.y
-        self.collide("y", self.game.walls)
+        self.collide("y", self.game.obstacles)
 
         
 

@@ -33,7 +33,7 @@ TILESIZE = 32
 
 
 # Gameplay setting
-PLAYERHP = 100
+PLAYERHP = 200
 
 # Healthabar settings
 BORDER_WIDTH = 3

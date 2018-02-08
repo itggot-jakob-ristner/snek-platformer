@@ -39,8 +39,8 @@ PLAYERHP = 200
 BORDER_WIDTH = 3
 
 # Enemy settings
-NPCFRIC = -0.05
-NPCACC = 0.2
+NPCFRIC = -0.07
+NPCACC = 0.17
 
 
 

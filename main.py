@@ -26,7 +26,6 @@ class Game:
         resources_folder = path.join(game_folder, "resources")
         map_folder = path.join(resources_folder, "maps")
         self.map = Tilemap(path.join(map_folder, "start_map.tmx"))
-        #self.map = Tilemap(path.join(map_folder, "test_map.tmx"))
         self.map_img = self.map.make_map()
         self.maprect = self.map_img.get_rect()
 
@@ -98,7 +97,7 @@ class Game:
         # This just freezes the display and ads an opaque black rectangle on top
         # necessary for moving tghe window around without everything falling
         # through the map when you stop moving it
-        self.pause_text = Menutext("Game Paused", self.screen, 24)
+        self.pause_text = Menutext("Game Paused", self.screen, WHITE, 24)
         self.pause_text.rect.center = self.rect.center
         pause_screen = pg.Surface((WIDTH, HEIGHT))
         pause_screen.set_alpha(180)

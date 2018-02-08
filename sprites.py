@@ -68,7 +68,7 @@ class Player(Entity):
         recoures_folder = path.join(game_folder, "resources")
         player_models_folder = path.join(recoures_folder, "player_models")
         images = [pg.image.load(path.join(player_models_folder, "player_right.png")), pg.image.load(path.join(player_models_folder, "player_left.png"))]
-        super().__init__(game, x, y, [game.players, game.all_sprites], images, PLAYERHP)
+        super().__init__(game, x, y, [game.players, game.all_sprites, game.obstacles], images, PLAYERHP)
         self.health_disp = Healthbar(self)
         self.inventory = []
 
@@ -195,7 +195,10 @@ class Npc(Entity):
         if coll[0] and not self.player.i_frame:
             self.player.hp -= 10
             self.player.damage_counter = 0
-            self.player.vel.x = self.facing.x * 10
+            if direction.y > 0:
+                self.player.vel.x = self.facing.x * -10
+            elif direction.y < 0:
+                self.player.vel.x = self.facing.x * 10
         self.collide("x", self.game.obstacles) 
 
         

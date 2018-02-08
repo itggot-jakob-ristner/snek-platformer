@@ -73,8 +73,7 @@ class Player(Entity):
         self.inventory = []
 
 
-    def update(self):
-        
+    def update(self):  
         # this stops the game from continiung when you die
         if self.hp <= 0:
             self.game.playing = False
@@ -193,7 +192,7 @@ class Npc(Entity):
         # the damaging collisions in x are handled by the enemy, why does this work
         # better than just doing both in the player.update() you might ask? I DONT FUCKING KNOW
         coll = self.collide("x", self.game.players)
-        if coll[0] and not self.i_frame:
+        if coll[0] and not self.player.i_frame:
             self.player.hp -= 10
             self.player.damage_counter = 0
             self.player.vel.x = self.facing.x * 10

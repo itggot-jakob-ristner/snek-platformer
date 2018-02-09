@@ -10,12 +10,13 @@ class Menutext:
         self.screen = screen
         self.anti_aliasing = AA
         self.rect = self.screen_text.get_rect()
+        self.color = color
 
     def draw(self, cord):
         self.screen.blit(self.screen_text, (cord))
 
-    def update(self, new_text):
-        self.screen_text = self.font.render(new_text, self.anti_aliasing, BLACK)
+    def update(self, new_text, color):
+        self.screen_text = self.font.render(new_text, self.anti_aliasing, color)
         self.rect = self.screen_text.get_rect()
 
 
@@ -34,7 +35,7 @@ class Healthbar:
         self.background.fill(BLACK)
         self.hp_rect = pg.Surface((self.display_hp * 3, 20))
         self.hp_rect.fill((156, 39, 29))
-        self.text = Menutext(f"HP:{self.player.hp} / {self.player.max_hp}", self.game.screen, BLACK, 16)
+        self.text = Menutext(f"HP:{self.player.hp} / {self.player.max_hp}", self.game.screen, YELLOW, 16)
     
     
     def update(self):
@@ -42,7 +43,7 @@ class Healthbar:
         # and so we reset the hp if it dips below zero
         if self.player.hp <= 0:
             self.player.hp = 0
-        self.text.update(f"HP:{self.player.hp} / {self.player.max_hp}")
+        self.text.update(f"HP:{self.player.hp} / {self.player.max_hp}", WHITE)
         if self.hp_rect.get_width() != self.player.hp * 3:
             self.hp_rect = pg.Surface((self.player.hp * 3, 20))
             self.hp_rect.fill((156, 39, 29))

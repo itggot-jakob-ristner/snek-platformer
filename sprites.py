@@ -101,7 +101,7 @@ class Player(Entity):
             #-:-
             self.acc.x = PLAYER_ACC
             self.image = self.images[0]
-        if keys[pg.K_SPACE]:
+        if keys[pg.K_w] or keys[pg.K_SPACE]:
             self.jump()
         if keys[pg.K_r]:
             self.hp -= 1
@@ -138,6 +138,9 @@ class Player(Entity):
             self.damage_counter = 0
             self.vel.y = -10
         self.collide("y", self.game.obstacles)
+    
+    def loaddata(self):
+        pass
     
 
 

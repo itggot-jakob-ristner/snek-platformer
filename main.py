@@ -20,20 +20,20 @@ class Game:
         self.rect = self.screen.get_rect()
 
 
-    def loadmap(self):
+    def loadmap(self, mappath):
         # This loads the map, pretty self explanatory
         game_folder = path.dirname(__file__)
         resources_folder = path.join(game_folder, "resources")
         map_folder = path.join(resources_folder, "maps")
-        self.map = Tilemap(path.join(map_folder, "start_map.tmx"))
+        self.map = Tilemap(path.join(map_folder, mappath))
         self.map_img = self.map.make_map()
         self.maprect = self.map_img.get_rect()
 
 
 
-    def new(self):
+    def new(self, mappath):
         # start a new game
-        self.loadmap()
+        self.loadmap(mappath)
 
         self.all_sprites = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
@@ -123,5 +123,4 @@ class Game:
 
     def show_go_screen(self):
         # game over/continue
-        print("You ded")
         self.running = False

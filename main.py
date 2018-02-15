@@ -18,6 +18,7 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
         self.rect = self.screen.get_rect()
+        self.pausemenu = Pausemenu(self)
 
 
     def loadmap(self, mappath):
@@ -64,6 +65,7 @@ class Game:
             self.draw()
 
     def update(self):
+        print("hi")
         # Game Loop - Update
         self.all_sprites.update()
         self.camera.update(self.player)
@@ -78,7 +80,9 @@ class Game:
                     self.playing = False
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    self.pause()
+                    self.pausemenu.run()
+                elif event.key == pg.K_b:
+                    self.pausemenu.run()
 
 
 

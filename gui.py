@@ -1,5 +1,6 @@
 import pygame as pg
 from main import *
+from settings import *
 
 
 
@@ -15,9 +16,72 @@ class Menutext:
     def draw(self, cord):
         self.screen.blit(self.screen_text, (cord))
 
-    def update(self, new_text, color):
+    def update(self, new_text, color, newsize=16):
+        self.font = pg.font.Font("resources/fonts/PressStart2P.ttf", newsize)
         self.screen_text = self.font.render(new_text, self.anti_aliasing, color)
         self.rect = self.screen_text.get_rect()
+
+class Pausemenu:
+    def __init__(self, game):
+        self.game = game
+        self.open = True
+        self.options = ["Inventory", "Map", "Save & Quit"]
+        self.texts = []
+        self.selected = 0
+        self.background = pg.Surface((WIDTH, HEIGHT))
+        self.background.set_alpha(180)
+        self.background.fill(BLACK)
+        for i in self.options:
+            self.texts.append(Menutext(i, self.game.screen, (150, 150, 150), 32))
+            
+            
+    def run(self):
+        self.open = True
+        while self.open:
+            self.update()
+            self.draw()
+    
+    def update(self):
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                self.open = False
+                if self.game.playing:
+                    self.game.playing = False
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_s or event.key == pg.K_DOWN:
+                    if self.selected < len(self.options) - 1:
+                        self.selected += 1
+                elif event.key == pg.K_w or event.key == pg.K_UP:
+                    if self.selected > 0:
+                        self.selected -= 1
+                elif event.key == pg.K_ESCAPE:
+                    self.open = False
+
+        
+        for index, text in enumerate(self.texts):
+            if index == self.selected:
+                text.update(self.options[index], WHITE, 60)
+            else:
+                text.update(self.options[index], (150, 150, 150), 32)
+            
+            text.rect.center = (self.game.rect.centerx, index * 70 + 400)
+           
+    def draw(self):
+        self.game.screen.fill(WHITE)
+        self.game.screen.blit(self.game.map_img, self.game.camera.applyrect(self.game.maprect))
+        for sprite in self.game.all_sprites:
+            self.game.screen.blit(sprite.image, self.game.camera.apply(sprite))
+        self.game.player.health_disp.draw()
+        self.game.screen.blit(self.background, (0, 0))
+
+
+        for index, text in enumerate(self.texts):
+            text.draw(text.rect)
+        self.game.clock.tick()
+        pg.display.flip()
+
+    def execute(self):
+        self.selected.open()
 
 
 

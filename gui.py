@@ -25,6 +25,7 @@ class Pausemenu:
     def __init__(self, game):
         self.game = game
         self.open = True
+        self.player = self.game.player
         self.options = ["Inventory", "Map", "Save & Quit"]
         self.texts = []
         self.selected = 0
@@ -67,14 +68,10 @@ class Pausemenu:
             text.rect.center = (self.game.rect.centerx, index * 70 + 400)
            
     def draw(self):
-        self.game.screen.fill(WHITE)
-        self.game.screen.blit(self.game.map_img, self.game.camera.applyrect(self.game.maprect))
-        for sprite in self.game.all_sprites:
-            self.game.screen.blit(sprite.image, self.game.camera.apply(sprite))
-        self.game.player.health_disp.draw()
+        
+        # Here we draw everything so give the visual of a frozen background
+        self.game.draw()
         self.game.screen.blit(self.background, (0, 0))
-
-
         for index, text in enumerate(self.texts):
             text.draw(text.rect)
         self.game.clock.tick()

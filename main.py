@@ -5,6 +5,7 @@ from settings import *
 from sprites import *
 from tilemap import *
 from gui import * 
+from items import *
 from os import path
 
 
@@ -18,7 +19,7 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
         self.rect = self.screen.get_rect()
-        self.pausemenu = Pausemenu(self)
+        self.items = generate_items()
 
 
     def loadmap(self, mappath):
@@ -41,6 +42,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.damaging_on_coll = pg.sprite.Group()
         self.players = pg.sprite.Group()
+        self.enemies = pg.sprite.Group()
 
         # Adds objects in to the game based on the object layer in the .tmx file loaded
         for tileobject in self.map.tmxdata.objects:
@@ -51,7 +53,7 @@ class Game:
             elif tileobject.name == "enemy":
                 Npc(self, tileobject.x, tileobject.y)
             
-
+        self.pausemenu = Pausemenu(self)
         self.camera = Camera(self.map.width, self.map.height)
         self.run()
 
@@ -63,9 +65,10 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            # After drawing everything we flip the dispkay
+            pg.display.flip()
 
     def update(self):
-        print("hi")
         # Game Loop - Update
         self.all_sprites.update()
         self.camera.update(self.player)
@@ -92,34 +95,17 @@ class Game:
         self.screen.blit(self.map_img, self.camera.applyrect(self.maprect))
         for sprite in self.all_sprites:
             self.screen.blit(sprite.image, self.camera.apply(sprite))
+        for enemy in self.enemies:
+            # This draws the healthbars for the enemies
+            hp_percent = enemy.hp / enemy.max_hp
+            background_rect = pg.Rect(enemy.rect.left, enemy.rect.top - 10, enemy.rect.width, 5)
+            health_rect = pg.Rect(enemy.rect.left, enemy.rect.top - 10, enemy.rect.width * hp_percent, 5)
+            pg.draw.rect(self.screen, RED, self.camera.applyrect(background_rect))
+            pg.draw.rect(self.screen, YELLOW, self.camera.applyrect(health_rect))
+        if self.player.attacking:
+            pg.draw.rect(self.screen, BLACK, self.camera.apply(self.player.weapon.hitbox))
         self.player.health_disp.draw()
 
-        # after drawing everything, flip the display
-        pg.display.flip()
-    
-    def pause(self):
-        # This just freezes the display and ads an opaque black rectangle on top
-        # necessary for moving tghe window around without everything falling
-        # through the map when you stop moving it
-        self.pause_text = Menutext("Game Paused", self.screen, WHITE, 24)
-        self.pause_text.rect.center = self.rect.center
-        pause_screen = pg.Surface((WIDTH, HEIGHT))
-        pause_screen.set_alpha(180)
-        pause_screen.fill(BLACK)
-        self.screen.blit(pause_screen, (0, 0))
-        paused = True
-        while paused:
-            self.pause_text.draw(self.pause_text.rect)
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    if self.playing:
-                        self.playing = False
-                    paused = False
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
-                        paused = False
-            self.clock.tick()
-            pg.display.flip()
 
     def show_start_screen(self):
         # game splash/start screen

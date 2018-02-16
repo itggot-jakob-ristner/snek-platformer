@@ -31,6 +31,10 @@ class Entity(pg.sprite.Sprite):
             self.vel.y = -25
             self.in_air = True
     
+    def kill(self):
+        for group in self.groups:
+            group.remove(self)
+    
     def collide(self, direction, group):
         #This function makes the sprite not pass through other sprites in a group
         hits = pg.sprite.spritecollide(self, group, False)
@@ -73,9 +77,15 @@ class Player(Entity):
         super().__init__(game, x, y, [game.players, game.all_sprites, game.obstacles], images, PLAYERHP)
         self.health_disp = Healthbar(self)
         self.inventory = []
+        # Giving player some items, (TEMPORARY)
+        self.inventory = self.game.items
+        self.equip(self.inventory[0])
+
+        self.attack_timer = 0
 
 
     def update(self):  
+        self.attacking = False
         # this stops the game from continiung when you die
         if self.hp <= 0:
             self.game.playing = False
@@ -87,6 +97,8 @@ class Player(Entity):
             self.i_frame = False
         else: 
             self.i_frame = True
+        
+        self.attack_timer += 1
 
         # Resets the acceleration every tick
         self.acc = vec(0, PLAYER_GRAV)
@@ -97,21 +109,29 @@ class Player(Entity):
             # Switches the image when you move from left to right
             self.acc.x = -PLAYER_ACC
             self.image = self.images[1]
+            self.facing.x = -1
         if keys[pg.K_d]:
             #-:-
             self.acc.x = PLAYER_ACC
             self.image = self.images[0]
+            self.facing.x = 1
         if keys[pg.K_w] or keys[pg.K_SPACE]:
             self.jump()
         if keys[pg.K_r]:
             self.hp -= 1
+        if keys[pg.K_e]:
+            self.attacking = True
+            if self.attack_timer * (self.game.dt / 20) > self.weapon.recovery:
+                self.attack()
+                print("hi")
+        if keys[pg.K_h]:
+            try:
+                self.inventory[0].use(self)
+            except:
+                pass
         if self.vel.y < 0:
             self.in_air = True
-        
-        if self.vel.x > 0:
-            self.facing = vec(0, 1)
-        elif self.vel.x < 0:
-            self.facing = vec(0, 1)
+    
 
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
@@ -138,6 +158,29 @@ class Player(Entity):
             self.damage_counter = 0
             self.vel.y = -10
         self.collide("y", self.game.obstacles)
+
+        if self.facing.x > 0:
+            self.weapon.hitbox.rect.midleft = self.rect.midright
+        else:
+            self.weapon.hitbox.rect.midright = self.rect.midleft
+
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+    
+    def equip(self, weapon):
+        if weapon.equipabble == "weapon":
+            self.weapon = weapon
+            self.inventory.remove(weapon)
+        else:
+            print("thats not a weapon kid")
+    
+    def attack(self):
+        hits = pg.sprite.spritecollide(self.weapon.hitbox, self.game.enemies, False)
+        if hits:
+            hits[0].hp -= self.weapon.damage
+            hits[0].vel.x = 15 * self.facing.x
+        self.attack_timer = 0
+        
     
     def loaddata(self):
         pass
@@ -148,9 +191,12 @@ class Player(Entity):
 class Npc(Entity):
     # This will eventually be a superclass for all entitys that are not the player but currently is just the enemies
     def __init__(self, game, x, y):
-        super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.damaging_on_coll], [pg.Surface((32, 64))], PLAYERHP)
+        super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.damaging_on_coll, game.enemies], [pg.Surface((32, 64))], PLAYERHP)
         self.image.fill(RED)
         self.player = self.game.player
+        self.healthbar = pg.Surface((16, 5))
+        self.healthbar_rect = self.healthbar.get_rect()
+
 
     
     def update(self):
@@ -204,6 +250,9 @@ class Npc(Entity):
 
         self.rect.y = self.pos.y
         self.collide("y", self.game.obstacles)
+
+        if self.hp <= 0:
+            self.kill()
 
         
 

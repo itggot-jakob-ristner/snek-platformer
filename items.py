@@ -30,7 +30,7 @@ class Weapon(Item):
 def generate_items():
     items = []
     small_h_pot = Consumable("Small Health Potion", 10, 20)
-    items.append(Weapon("Wooden Sword", 20, (0, 0, 32, 5), 20, 20))
+    items.append(Weapon("Epic Sword", 20, (0, 0, 48, 15), 60, 50))
     for i in range(2):
         items.append(small_h_pot)
     return items

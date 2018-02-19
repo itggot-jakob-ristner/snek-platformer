@@ -4,6 +4,7 @@ from os import path
 from gui import * 
 vec = pg.math.Vector2
 
+
 class Entity(pg.sprite.Sprite):
     # Superclass for all movinf entitys; players and enemies etc
     def __init__(self, game, x, y, groups, images, hp):
@@ -24,6 +25,7 @@ class Entity(pg.sprite.Sprite):
         self.damage_counter = 0
         self.i_frame = False
         self.prev_vel = vec(0, 0)
+        self.attacking = False
     
     def jump(self):
         # jump only if standing on a platform
@@ -85,7 +87,7 @@ class Player(Entity):
 
 
     def update(self):  
-        self.attacking = False
+        speed_multiplier = 1
         # this stops the game from continiung when you die
         if self.hp <= 0:
             self.game.playing = False
@@ -120,18 +122,25 @@ class Player(Entity):
         if keys[pg.K_r]:
             self.hp -= 1
         if keys[pg.K_e]:
-            self.attacking = True
-            if self.attack_timer * (self.game.dt / 20) > self.weapon.recovery:
-                self.attack()
-                print("hi")
+            pass
+        if keys[pg.K_LSHIFT]:
+            speed_multiplier = 2
+            # if self.attack_timer * (self.game.dt / 20) < self.weapon.recovery:
+            #     self.attacking = True
+            #     print(self.attack_timer)
         if keys[pg.K_h]:
             try:
                 self.inventory[0].use(self)
             except:
                 pass
+        
+
         if self.vel.y < 0:
             self.in_air = True
     
+
+        # Apply sprint
+        self.acc.x *= speed_multiplier
 
         # apply friction
         self.acc.x += self.vel.x * PLAYER_FRICTION
@@ -175,10 +184,13 @@ class Player(Entity):
             print("thats not a weapon kid")
     
     def attack(self):
+        self.attacking = True
         hits = pg.sprite.spritecollide(self.weapon.hitbox, self.game.enemies, False)
         if hits:
-            hits[0].hp -= self.weapon.damage
-            hits[0].vel.x = 15 * self.facing.x
+            for enemy in hits:
+                enemy.hp -= self.weapon.damage
+                enemy.vel.x = 15 * self.facing.x
+                enemy.vel.y = -5
         self.attack_timer = 0
         
     
@@ -192,7 +204,7 @@ class Npc(Entity):
     # This will eventually be a superclass for all entitys that are not the player but currently is just the enemies
     def __init__(self, game, x, y):
         super().__init__(game, x, y, [game.obstacles, game.all_sprites, game.damaging_on_coll, game.enemies], [pg.Surface((32, 64))], PLAYERHP)
-        self.image.fill(RED)
+        self.image.fill(BLACK)
         self.player = self.game.player
         self.healthbar = pg.Surface((16, 5))
         self.healthbar_rect = self.healthbar.get_rect()

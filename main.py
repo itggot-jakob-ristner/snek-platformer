@@ -61,7 +61,7 @@ class Game:
         # Game Loop
         self.playing = True
         while self.playing:
-            self.dt = self.clock.tick()
+            self.dt = self.clock.tick(120)
             self.events()
             self.update()
             self.draw()
@@ -86,7 +86,14 @@ class Game:
                     self.pausemenu.run()
                 elif event.key == pg.K_b:
                     self.pausemenu.run()
-
+                elif event.key == pg.K_e:
+                    if self.player.attack_timer * (self.dt / 20) > self.player.weapon.recovery:
+                        self.player.attack()
+                # elif event.key == pg.K_g:
+                #     self.new("start_map.tmx")
+            elif event.type == pg.KEYUP:
+                if event.key == pg.K_e:
+                    self.player.attacking = False
 
 
     def draw(self):

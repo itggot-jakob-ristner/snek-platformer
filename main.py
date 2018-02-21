@@ -20,6 +20,7 @@ class Game:
         self.running = True
         self.rect = self.screen.get_rect()
         self.items = generate_items()
+        self.player_spawned = False
 
 
     def loadmap(self, mappath):
@@ -31,28 +32,38 @@ class Game:
         self.map_img = self.map.make_map()
         self.maprect = self.map_img.get_rect()
 
-
-
-    def new(self, mappath):
-        # start a new game
-        self.loadmap(mappath)
-
         self.all_sprites = pg.sprite.Group()
         self.obstacles = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.damaging_on_coll = pg.sprite.Group()
         self.players = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
+        self.cell_linkers = pg.sprite.Group()
+
 
         # Adds objects in to the game based on the object layer in the .tmx file loaded
         for tileobject in self.map.tmxdata.objects:
             if tileobject.name == "wall":
                 Obstacle(tileobject.x, tileobject.y, tileobject.width, tileobject.height, self)
-            elif tileobject.name == "player":
+            elif tileobject.name == "player" and not self.player_spawned:
+                self.player_spawned = True
                 self.player = Player(self, tileobject.x, tileobject.y)
             elif tileobject.name == "enemy":
                 Npc(self, tileobject.x, tileobject.y)
-            
+            elif tileobject.name == "cell_load":
+                Celllinker(tileobject.x, tileobject.y, tileobject.width, tileobject.height, self, tileobject.properties["cell_link"], [float(coord) for coord in tileobject.properties["cell_spawn"].split(",")])
+
+        if self.player not in self.all_sprites:
+            self.all_sprites.add(self.player)
+            self.players.add(self.player)
+
+
+
+
+    def new(self):
+        # start a new game
+        self.loadmap("start_map.tmx")
+        
         self.pausemenu = Pausemenu(self)
         self.camera = Camera(self.map.width, self.map.height)
         self.run()
@@ -89,6 +100,7 @@ class Game:
                 elif event.key == pg.K_e:
                     if self.player.attack_timer * (self.dt / 20) > self.player.weapon.recovery:
                         self.player.attack()
+                        #self.player.image = pg.transform.rotate(self.player.image, 5)
                 # elif event.key == pg.K_g:
                 #     self.new("start_map.tmx")
             elif event.type == pg.KEYUP:
@@ -116,7 +128,15 @@ class Game:
 
     def show_start_screen(self):
         # game splash/start screen
-        pass
+        started = False
+        while not started:
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_RETURN:
+                        started = True
+            self.screen.fill(BLACK)    
+            self.clock.tick()       
+            pg.display.flip           
 
     def show_go_screen(self):
         # game over/continue

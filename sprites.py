@@ -87,6 +87,7 @@ class Player(Entity):
 
 
     def update(self):  
+        print(self.pos)
         speed_multiplier = 1
         # this stops the game from continiung when you die
         if self.hp <= 0:
@@ -167,6 +168,7 @@ class Player(Entity):
             self.damage_counter = 0
             self.vel.y = -10
         self.collide("y", self.game.obstacles)
+        self.coll_cell_link()
 
         if self.facing.x > 0:
             self.weapon.hitbox.rect.midleft = self.rect.midright
@@ -192,7 +194,11 @@ class Player(Entity):
                 enemy.vel.x = 15 * self.facing.x
                 enemy.vel.y = -5
         self.attack_timer = 0
-        
+    
+    def coll_cell_link(self):
+        hits = pg.sprite.spritecollide(self, self.game.cell_linkers, False)
+        if hits:
+            hits[0].switch_cell()
     
     def loaddata(self):
         pass
@@ -283,8 +289,25 @@ class Obstacle(pg.sprite.Sprite):
         self.x = x
         self.y = y
 
-
-                
+class Celllinker(pg.sprite.Sprite):
+    def __init__(self, x, y, w, h, game, linked_map, spawn_point):
+        self.groups = [game.cell_linkers]
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.rect = pg.Rect(x, y, w, h)
+        self.rect.x = x
+        self.rect.y = y
+        self.x = x
+        self.y = y
+        self.linked_map = linked_map
+        self.spawn_point = spawn_point
+    
+    def switch_cell(self):
+        self.game.player.vel = vec(0, 0)
+        # transition to be added
+        self.game.loadmap(self.linked_map)
+        self.game.player.pos = vec(self.spawn_point[0], self.spawn_point[1]) * TILESIZE
+        self.game.player.rect.x, self.game.player.rect.y = self.game.player.pos.y, self.game.player.pos.x
         
         
 
